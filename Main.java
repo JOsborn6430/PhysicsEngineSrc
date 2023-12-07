@@ -9,6 +9,8 @@ public class Main {
     public static final double DT = 0.05;
     public static final boolean GRAVITY = true;
 
+    public static final boolean enableInitDialogue = false;
+
     public static void main(String[] args) {
 
         System.out.println("Please work");
@@ -20,14 +22,15 @@ public class Main {
         b1.name = "Box 1";
         b1.height = 30;
         b1.width = 30;
-        b1.position = new double[]{300,100};
-        b1.momentum = new double[]{10,0};
+        b1.position = new double[]{600,100};
+        b1.momentum = new double[]{-10,0};
 
         Box b2 = new Box();
         b2.name = "Box 2";
         b2.height = 30;
         b2.width = 30;
         b2.position = new double[]{150,100};
+        b2.momentum = new double[]{10,0};
 
         Box b3 = new Box();
         b3.name = "Box 3";
@@ -60,97 +63,129 @@ public class Main {
         floor.width = 500;
         floor.position = new double[]{350,10};
 
-        Scanner scanner = new Scanner(System.in);
+        Box[] boxes;
+        Circle[] circles;
+        Shapes[] objects;
 
-        System.out.print("How many boxes do you want? ");
-        Box[] boxes = new Box[scanner.nextInt()];
-        for (int i = 0; i < boxes.length; i++) {
-            boxes[i] = new Box();
-        }
+        if (enableInitDialogue) {
 
-        for (int i = 0; i < boxes.length; i++) {
-            System.out.print("Is box " + (i+1) + " static? (true or false): ");
-            boxes[i].isStatic = scanner.nextBoolean();
+            Scanner scanner = new Scanner(System.in);
 
-            System.out.print("Height and width of box " + (i+1) + ": ");
-            boxes[i].height = scanner.nextInt();
-            boxes[i].width = scanner.nextInt();
+            System.out.print("How many boxes do you want? ");
+            boxes = new Box[scanner.nextInt()];
+            for (int i = 0; i < boxes.length; i++) {
+                boxes[i] = new Box();
+            }
 
-            System.out.print("Position of Box" + (i+1) + ": ");
-            boxes[i].position = new double[]{scanner.nextInt(), scanner.nextInt()};
+            for (int i = 0; i < boxes.length; i++) {
+                System.out.print("Is box " + (i + 1) + " static? (true or false): ");
+                boxes[i].isStatic = scanner.nextBoolean();
 
+                System.out.print("Height and width of box " + (i + 1) + ": ");
+                boxes[i].height = scanner.nextInt();
+                boxes[i].width = scanner.nextInt();
 
-            //for mass of boxes
-            System.out.print("Mass of Box" + (i+1) + ": ");
-            boxes[i].mass = scanner.nextDouble();
+                System.out.print("Position of Box" + (i + 1) + ": ");
+                boxes[i].position = new double[]{scanner.nextInt(), scanner.nextInt()};
 
-            //for friction of boxes
-            System.out.print("Friction of Box" + (i+1) + ": ");
-            boxes[i].friction = scanner.nextDouble();
+                //for mass of boxes
+                System.out.print("Mass of Box" + (i + 1) + ": ");
+                boxes[i].mass = scanner.nextDouble();
 
-            //for bounce of boxes
-            System.out.print("Bounce of Box" + (i+1) + ": ");
-            boxes[i].bounce = scanner.nextDouble();
+                System.out.print("Initial velocity of box" + (i + 1) + ": ");
+                boxes[i].momentum = new double[]{scanner.nextInt() * boxes[i].mass, scanner.nextInt() * boxes[i].mass};
 
+                //for friction of boxes
+                System.out.print("Friction of Box" + (i + 1) + ": ");
+                boxes[i].friction = scanner.nextDouble();
 
-
-        }
-
-
-        System.out.println("How many circles do you want? ");
-        Circle[] circles = new Circle[scanner.nextInt()];
-        for (int i = 0; i < circles.length; i++) {
-            circles[i] = new Circle();
-        }
-        for (int i = 0; i < circles.length; i++) {
-            System.out.print("Radius of circle " + (i+1) + ": ");
-            circles[i].radius = scanner.nextInt();
-
-            //for mass of circle
-            System.out.print("Mass of Circle" + (i+1) + ": ");
-            circles[i].mass = scanner.nextDouble();
-
-            //for friction of circle
-            System.out.print("Friction of Circle" + (i+1) + ": ");
-            circles[i].friction = scanner.nextDouble();
-
-            //for bounce of circle
-            System.out.print("Bounce of Circle" + (i+1) + ": ");
-            circles[i].bounce = scanner.nextDouble();
-        }
+                //for bounce of boxes
+                System.out.print("Bounce of Box" + (i + 1) + ": ");
+                boxes[i].bounce = scanner.nextDouble();
 
 
-        // Create new init loop:
-        // How many boxes do you want?
-        // take input and create box array of that length.
-        // loop through new array, and use user input to init each field.
-
-        //Example
-        // C: How many boxes would you like?
-        // U: 3
-        // *Creates new array length 3
-        // C: Mass of box 1?
-        // U: 2
-        // C: x and y position of box 1?
-        // u: 100 300
-        // C: velocity of box 1?
-        // U: 20 0
-        // C: Mass of Box 2?
-        //.... repeat for all boxes
+            }
 
 
-        //Master Array
-        //This code combines the two separate circle and box arrays into one master array
-        Shapes[] objects = new Shapes[boxes.length + circles.length];
-        for (int i = 0; i < boxes.length; i++) {
-            objects[i] = boxes[i];
-        }
-        for (int i = boxes.length; i < objects.length; i++) {
-            objects[i] = circles[i-boxes.length];
-        }
+            System.out.println("How many circles do you want? ");
+            circles = new Circle[scanner.nextInt()];
+            for (int i = 0; i < circles.length; i++) {
+                circles[i] = new Circle();
+            }
+            for (int i = 0; i < circles.length; i++) {
+                System.out.print("Radius of circle " + (i + 1) + ": ");
+                circles[i].radius = scanner.nextInt();
 
-        for (int i = 0; i < objects.length; i++) {
-            System.out.println(objects[i].mass);
+                //for mass of circle
+                System.out.print("Mass of Circle" + (i + 1) + ": ");
+                circles[i].mass = scanner.nextDouble();
+
+                //for friction of circle
+                System.out.print("Friction of Circle" + (i + 1) + ": ");
+                circles[i].friction = scanner.nextDouble();
+
+                //for bounce of circle
+                System.out.print("Bounce of Circle" + (i + 1) + ": ");
+                circles[i].bounce = scanner.nextDouble();
+            }
+
+
+            // Create new init loop:
+            // How many boxes do you want?
+            // take input and create box array of that length.
+            // loop through new array, and use user input to init each field.
+
+            //Example
+            // C: How many boxes would you like?
+            // U: 3
+            // *Creates new array length 3
+            // C: Mass of box 1?
+            // U: 2
+            // C: x and y position of box 1?
+            // u: 100 300
+            // C: velocity of box 1?
+            // U: 20 0
+            // C: Mass of Box 2?
+            //.... repeat for all boxes
+
+
+            //Master Array
+            //This code combines the two separate circle and box arrays into one master array
+            objects = new Shapes[boxes.length + circles.length];
+            for (int i = 0; i < boxes.length; i++) {
+                objects[i] = boxes[i];
+            }
+            for (int i = boxes.length; i < objects.length; i++) {
+                objects[i] = circles[i - boxes.length];
+            }
+
+            for (int i = 0; i < objects.length; i++) {
+                System.out.println(objects[i].mass);
+            }
+        } else {
+            objects = new Shapes[]{b1, b2, floor};
+
+            int boxArrayLength = 0;
+            for (int i = 0; i < objects.length; i++) if (objects[i] instanceof Box) boxArrayLength++;
+            boxes = new Box[boxArrayLength];
+            int boxesIndex = 0;
+            for (int i = 0; boxesIndex < boxArrayLength; i++) {
+                if (objects[i] instanceof Box) {
+                    boxes[boxesIndex] = (Box)objects[i];
+                    boxesIndex++;
+                }
+            }
+            int circleArrayLength = 0;
+            for (int i = 0; i < objects.length; i++) if (objects[i] instanceof Circle) circleArrayLength++;
+            circles = new Circle[circleArrayLength];
+            int circlesIndex = 0;
+            for (int i = 0; circlesIndex < circleArrayLength; i++) {
+                if (objects[i] instanceof Circle) {
+                    circles[circlesIndex] = (Circle) objects[i];
+                    circlesIndex++;
+                }
+            }
+
         }
 
         //Drawing Board initialization
@@ -162,26 +197,7 @@ public class Main {
         //create sub arrays
         // This stupid code sorts the master array into sub arrays of each object type. I will make working with large numbers of objects easier.
         // It also removes the need to check for specific object type when resolving collisions.
-//        int boxArrayLength = 0;
-//        for (int i = 0; i < objects.length; i++) if (objects[i] instanceof Box) boxArrayLength++;
-//        Box[] boxes = new Box[boxArrayLength];
-//        int boxesIndex = 0;
-//        for (int i = 0; boxesIndex < boxArrayLength; i++) {
-//            if (objects[i] instanceof Box) {
-//                boxes[boxesIndex] = (Box)objects[i];
-//                boxesIndex++;
-//            }
-//        }
-//        int circleArrayLength = 0;
-//        for (int i = 0; i < objects.length; i++) if (objects[i] instanceof Circle) circleArrayLength++;
-//        Circle[] circles = new Circle[circleArrayLength];
-//        int circlesIndex = 0;
-//        for (int i = 0; circlesIndex < circleArrayLength; i++) {
-//            if (objects[i] instanceof Circle) {
-//                circles[circlesIndex] = (Circle) objects[i];
-//                circlesIndex++;
-//            }
-//        }
+
 //        //test to make sure sorting worked
 //        System.out.println("Circles:");
 //        for (int i = 0; i < circles.length; i++) {
@@ -213,6 +229,7 @@ public class Main {
                 for (int j = i + 1; j < boxes.length; j++) {
                     if (Math.abs(boxes[i].position[1] - boxes[j].position[1]) <= (boxes[i].height/2.0 + boxes[j].height/2.0) &&
                             Math.abs(boxes[i].position[0] - boxes[j].position[0]) < (boxes[i].width/2.0 + boxes[j].width/2.0)) {
+                        System.out.println("V");
                         boxes[i].isOnFloor = true;
                         boxes[j].isOnFloor = true;
 
@@ -225,6 +242,32 @@ public class Main {
                             boxes[j].momentum[1] *= -1 * boxes[j].bounce;
                             boxes[j].position = Op.vectorAdditionD(boxes[j].position, Op.scalarMultiplyD(Op.scalarMultiplyD(boxes[j].momentum, DT), boxes[j].mass));
                         }
+
+                    }
+
+                    if (Math.abs(boxes[i].position[0] - boxes[j].position[0]) <= (boxes[i].width/2.0 + boxes[j].width/2.0) &&
+                            Math.abs(boxes[i].position[1] - boxes[j].position[1]) < (boxes[i].height/2.0 + boxes[j].height/2.0)) {
+                        System.out.println("H collision");
+                        if (!boxes[i].isStatic) {
+                            if (boxes[i].momentum[0]*boxes[j].momentum[0] < 0) {
+
+                                boxes[i].momentum[1] *= -1 * boxes[i].bounce;
+                                boxes[i].position = Op.vectorAdditionD(boxes[i].position, Op.scalarMultiplyD(Op.scalarMultiplyD(boxes[i].momentum, DT), boxes[i].mass));
+
+                        } else {
+                            }
+                        }
+
+                        if (!boxes[j].isStatic) {
+                            if (boxes[i].momentum[0]*boxes[j].momentum[0] < 0) {
+
+                                boxes[j].momentum[1] *= -1 * boxes[j].bounce;
+                                boxes[j].position = Op.vectorAdditionD(boxes[j].position, Op.scalarMultiplyD(Op.scalarMultiplyD(boxes[j].momentum, DT), boxes[j].mass));
+
+                            } else {
+                            }
+                        }
+
 
                     }
                     }
