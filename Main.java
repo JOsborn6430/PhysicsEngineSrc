@@ -11,6 +11,8 @@ public class Main {
 
     public static void main(String[] args) {
 
+        System.out.println("Please work");
+
 
         //Create and initialize Objects
         Box b1 = new Box();
