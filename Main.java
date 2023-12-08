@@ -251,7 +251,7 @@ public class Main {
                         if (!boxes[i].isStatic) {
                             if (boxes[i].momentum[0]*boxes[j].momentum[0] < 0) {
 
-                                boxes[i].momentum[1] *= -1 * boxes[i].bounce;
+                                boxes[i].momentum[0] *= -1 * boxes[i].bounce;
                                 boxes[i].position = Op.vectorAdditionD(boxes[i].position, Op.scalarMultiplyD(Op.scalarMultiplyD(boxes[i].momentum, DT), boxes[i].mass));
 
                         } else {
@@ -261,7 +261,7 @@ public class Main {
                         if (!boxes[j].isStatic) {
                             if (boxes[i].momentum[0]*boxes[j].momentum[0] < 0) {
 
-                                boxes[j].momentum[1] *= -1 * boxes[j].bounce;
+                                boxes[j].momentum[0] *= -1 * boxes[j].bounce;
                                 boxes[j].position = Op.vectorAdditionD(boxes[j].position, Op.scalarMultiplyD(Op.scalarMultiplyD(boxes[j].momentum, DT), boxes[j].mass));
 
                             } else {
