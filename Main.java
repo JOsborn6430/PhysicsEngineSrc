@@ -6,15 +6,12 @@ public class Main {
 
     //Settings
     public static final int MAXSTEPS = 5000;
-    public static final double DT = 0.05;
-    public static final boolean GRAVITY = true;
+    public static final double DT = 0.01;
+    public static final boolean GRAVITY = false;
 
     public static final boolean enableInitDialogue = false;
 
     public static void main(String[] args) {
-
-        System.out.println("Please work");
-        System.out.println("I think this works");
 
 
         //Create and initialize Objects
@@ -23,26 +20,27 @@ public class Main {
         b1.height = 30;
         b1.width = 30;
         b1.position = new double[]{600,100};
-        b1.momentum = new double[]{0,0};
+        b1.momentum = new double[]{-20,0};
+        b1.friction = 0.5;
 
         Box b2 = new Box();
         b2.name = "Box 2";
         b2.height = 30;
         b2.width = 30;
         b2.position = new double[]{150,100};
-        b2.momentum = new double[]{10,0};
+        b2.momentum = new double[]{40,0};
 
         Box b3 = new Box();
         b3.name = "Box 3";
         b3.height = 30;
         b3.width = 30;
-        b3.position = new double[]{150,200};
+        b3.position = new double[]{250,200};
 
         Box b4 = new Box();
         b4.name = "Box 4";
-        b4.height = 20;
-        b4.width = 40;
-        b4.position = new double[]{300,300};
+        b4.height = 40;
+        b4.width = 20;
+        b4.position = new double[]{250,300};
 
         Circle c1 = new Circle();
         c1.name = "c1";
@@ -163,7 +161,7 @@ public class Main {
                 System.out.println(objects[i].mass);
             }
         } else {
-            objects = new Shapes[]{b1, b2, floor};
+            objects = new Shapes[]{b1, b2, floor, b4, b3};
 
             int boxArrayLength = 0;
             for (int i = 0; i < objects.length; i++) if (objects[i] instanceof Box) boxArrayLength++;
@@ -231,10 +229,8 @@ public class Main {
                             Math.abs(boxes[i].position[0] - boxes[j].position[0]) <= (boxes[i].width / 2.0 + boxes[j].width / 2.0)) {
                         int collisionDirection;
                         if ((Math.abs(boxes[i].position[1]-boxes[j].position[1]) >= Math.abs(boxes[i].position[0]-boxes[j].position[0]) || boxes[i].isStatic || boxes[j].isStatic)) {
-                            System.out.println("Vertical");
                             collisionDirection = 1;
                         } else {
-                            System.out.println("Horizontal");
                             collisionDirection = 0;
                         }
 
@@ -243,6 +239,8 @@ public class Main {
                             boxes[i].position = Op.vectorAdditionD(boxes[i].position, Op.scalarMultiplyD(Op.scalarMultiplyD(boxes[i].momentum, DT), boxes[i].mass));
                             boxes[j].momentum[collisionDirection] *= -1 * boxes[j].bounce;
                             boxes[j].position = Op.vectorAdditionD(boxes[j].position, Op.scalarMultiplyD(Op.scalarMultiplyD(boxes[j].momentum, DT), boxes[j].mass));
+                            boxes[i].isOnFloor = true;
+                            boxes[j].isOnFloor = true;
                         } else {
                             int fastOne;
                             int slowOne;
@@ -322,7 +320,7 @@ public class Main {
             // Render Objects
             panel.clear();
             for (int i = 0; i < objects.length; i++) Render.drawObject(g, objects[i]);
-            panel.sleep(10);
+            panel.sleep(1);
 
 //            System.out.println("c1: " + c1.isOnFloor);
 //            System.out.println("c2: " + c2.isOnFloor);
