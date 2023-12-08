@@ -227,51 +227,24 @@ public class Main {
             // Box collision detection
             for (int i = 0; i < boxes.length - 1; i++) {
                 for (int j = i + 1; j < boxes.length; j++) {
-                    if (Math.abs(boxes[i].position[1] - boxes[j].position[1]) <= (boxes[i].height/2.0 + boxes[j].height/2.0) &&
-                            Math.abs(boxes[i].position[0] - boxes[j].position[0]) < (boxes[i].width/2.0 + boxes[j].width/2.0)) {
-                        System.out.println("V");
-                        boxes[i].isOnFloor = true;
-                        boxes[j].isOnFloor = true;
-
-                        if (!boxes[i].isStatic) {
-                            boxes[i].momentum[1] *= -1 * boxes[i].bounce;
-                            boxes[i].position = Op.vectorAdditionD(boxes[i].position, Op.scalarMultiplyD(Op.scalarMultiplyD(boxes[i].momentum, DT), boxes[i].mass));
-
-                        }
-                        if (!boxes[j].isStatic) {
-                            boxes[j].momentum[1] *= -1 * boxes[j].bounce;
-                            boxes[j].position = Op.vectorAdditionD(boxes[j].position, Op.scalarMultiplyD(Op.scalarMultiplyD(boxes[j].momentum, DT), boxes[j].mass));
-                        }
-
-                    }
-
-                    if (Math.abs(boxes[i].position[0] - boxes[j].position[0]) <= (boxes[i].width/2.0 + boxes[j].width/2.0) &&
-                            Math.abs(boxes[i].position[1] - boxes[j].position[1]) < (boxes[i].height/2.0 + boxes[j].height/2.0)) {
-                        System.out.println("H collision");
-                        if (!boxes[i].isStatic) {
-                            if (boxes[i].momentum[0]*boxes[j].momentum[0] < 0) {
-
-                                boxes[i].momentum[0] *= -1 * boxes[i].bounce;
-                                boxes[i].position = Op.vectorAdditionD(boxes[i].position, Op.scalarMultiplyD(Op.scalarMultiplyD(boxes[i].momentum, DT), boxes[i].mass));
-
+                    if (Math.abs(boxes[i].position[1] - boxes[j].position[1]) <= (boxes[i].height / 2.0 + boxes[j].height / 2.0) &&
+                            Math.abs(boxes[i].position[0] - boxes[j].position[0]) <= (boxes[i].width / 2.0 + boxes[j].width / 2.0)) {
+                        int collisionDirection;
+                        if (Math.abs(boxes[i].position[1]-boxes[j].position[1]) <= Math.abs(boxes[i].position[0]-boxes[j].position[0])) {
+                            System.out.println("Vertical");
+                            collisionDirection = 1;
                         } else {
-                            }
+                            System.out.println("Horizontal");
+                            collisionDirection = 0;
                         }
 
-                        if (!boxes[j].isStatic) {
-                            if (boxes[i].momentum[0]*boxes[j].momentum[0] < 0) {
-
-                                boxes[j].momentum[0] *= -1 * boxes[j].bounce;
-                                boxes[j].position = Op.vectorAdditionD(boxes[j].position, Op.scalarMultiplyD(Op.scalarMultiplyD(boxes[j].momentum, DT), boxes[j].mass));
-
-                            } else {
-                            }
-                        }
+                        boxes[i].momentum[collisionDirection] *= -1 * boxes[i].bounce;
+                        boxes[j].momentum[collisionDirection] *= -1 * boxes[j].bounce;
 
 
-                    }
                     }
                 }
+            }
             //circle on box vertical collision
             for (int i = 0; i < circles.length; i++) {
                 for (int j = 0; j < boxes.length; j++) {
@@ -298,6 +271,10 @@ public class Main {
 
             //Move Objects
             for (int i = 0; i < objects.length; i++) {
+                if (objects[i].isStatic) {
+                    objects[i].momentum = new double[]{0,0};
+                    objects[i].forceActing = new double[]{0,0};
+                }
 
                 // I converted everything into acceleration and velocity before making movement calculation
                 // I'm sure there is a more elegant way to do this.
