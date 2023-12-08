@@ -23,7 +23,7 @@ public class Main {
         b1.height = 30;
         b1.width = 30;
         b1.position = new double[]{600,100};
-        b1.momentum = new double[]{-10,0};
+        b1.momentum = new double[]{0,0};
 
         Box b2 = new Box();
         b2.name = "Box 2";
@@ -230,7 +230,7 @@ public class Main {
                     if (Math.abs(boxes[i].position[1] - boxes[j].position[1]) <= (boxes[i].height / 2.0 + boxes[j].height / 2.0) &&
                             Math.abs(boxes[i].position[0] - boxes[j].position[0]) <= (boxes[i].width / 2.0 + boxes[j].width / 2.0)) {
                         int collisionDirection;
-                        if (Math.abs(boxes[i].position[1]-boxes[j].position[1]) <= Math.abs(boxes[i].position[0]-boxes[j].position[0])) {
+                        if ((Math.abs(boxes[i].position[1]-boxes[j].position[1]) >= Math.abs(boxes[i].position[0]-boxes[j].position[0]) || boxes[i].isStatic || boxes[j].isStatic)) {
                             System.out.println("Vertical");
                             collisionDirection = 1;
                         } else {
@@ -238,9 +238,24 @@ public class Main {
                             collisionDirection = 0;
                         }
 
-                        boxes[i].momentum[collisionDirection] *= -1 * boxes[i].bounce;
-                        boxes[j].momentum[collisionDirection] *= -1 * boxes[j].bounce;
-
+                        if ((Op.vectorDotProduct(boxes[i].momentum, boxes[j].momentum) < 0) || boxes[i].isStatic || boxes[j].isStatic) {
+                            boxes[i].momentum[collisionDirection] *= -1 * boxes[i].bounce;
+                            boxes[i].position = Op.vectorAdditionD(boxes[i].position, Op.scalarMultiplyD(Op.scalarMultiplyD(boxes[i].momentum, DT), boxes[i].mass));
+                            boxes[j].momentum[collisionDirection] *= -1 * boxes[j].bounce;
+                            boxes[j].position = Op.vectorAdditionD(boxes[j].position, Op.scalarMultiplyD(Op.scalarMultiplyD(boxes[j].momentum, DT), boxes[j].mass));
+                        } else {
+                            int fastOne;
+                            int slowOne;
+                            if (boxes[i].momentum[collisionDirection] >= boxes[j].momentum[collisionDirection]) {
+                                fastOne = i;
+                                slowOne = j;
+                            } else {
+                                fastOne = j;
+                                slowOne = i;
+                            }
+                            boxes[slowOne].momentum[collisionDirection] += boxes[fastOne].momentum[collisionDirection];
+                            boxes[fastOne].momentum[collisionDirection] = 0;
+                        }
 
                     }
                 }
