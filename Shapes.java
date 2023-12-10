@@ -12,6 +12,8 @@ public class Shapes {
     double[] momentum = {0,0}; //in Kg * m/s
     double[] position = {0,0}; //in m
     double[] forceActing = {0,0}; //in N
+
+    int collisionImmunity = 0;
 }
 
 class Box extends Shapes {

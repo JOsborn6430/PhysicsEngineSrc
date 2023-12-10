@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.image.CropImageFilter;
+import java.sql.SQLOutput;
 import java.util.Scanner;
 
 public class Main {
@@ -10,6 +11,8 @@ public class Main {
     public static final boolean GRAVITY = false;
 
     public static final boolean enableInitDialogue = false;
+
+    public static final int DEFAULTCOLLISIONIMMUNITY = 3;
 
     public static void main(String[] args) {
 
@@ -46,13 +49,21 @@ public class Main {
         c1.name = "c1";
         c1.mass = 3;
         c1.radius = 30;
-        c1.position = new double[]{300,100};
+        c1.position = new double[]{300,250};
+        c1.momentum = new double[]{30,-10};
 
         Circle c2 = new Circle();
         c2.name = "c2";
         c2.mass = 3;
-        c2.radius = 5;
-        c2.position = new double[]{400,100};
+        c2.radius = 20;
+        c2.position = new double[]{400,200};
+        c2.momentum = new double[]{-10,20};
+
+        Circle c3 = new Circle();
+        c3.name = "c3";
+        c3.mass = 3;
+        c3.radius = 30;
+        c3.position = new double[]{500,200};
 
         Box floor = new Box();
         floor.name = "floor";
@@ -161,7 +172,10 @@ public class Main {
                 System.out.println(objects[i].mass);
             }
         } else {
-            objects = new Shapes[]{b1, b2, floor, b4, b3};
+            //Master object array
+
+            objects = new Shapes[]{c1, c2, floor};
+
 
             int boxArrayLength = 0;
             for (int i = 0; i < objects.length; i++) if (objects[i] instanceof Box) boxArrayLength++;
@@ -279,6 +293,46 @@ public class Main {
                     }
                 }
             }
+            //Circle on circle
+            for (int i = 0; i < circles.length - 1; i++) {
+                if (circles[i].collisionImmunity > 0) continue;
+                for (int j = i + 1; j < circles.length; j++) {
+                    if (circles[j].collisionImmunity > 0) continue;
+                    double[] T = {circles[i].position[0]-circles[j].position[0], circles[i].position[1]-circles[j].position[1]};
+                    if (Op.vectorMag(T) <= (circles[i].radius+circles[j].radius)) {
+
+                        // i x
+                        //circles[i].position[0] = ((circles[i].mass-circles[j].mass)/(circles[i].mass+circles[j].mass)) * circles[i].
+//                        double[] vi = Op.scalarMultiplyD(circles[i].momentum, 1/circles[i].mass);
+//                        double[] vj = Op.scalarMultiplyD(circles[j].momentum, 1/circles[j].mass);
+//
+//                        circles[i].momentum = Op.vectorAdditionD(Op.scalarMultiplyD(vi, circles[i].mass *((circles[i].mass-circles[j].mass)/(circles[i].mass+circles[j].mass))), Op.scalarMultiplyD(vj, circles[i].mass * ((2*circles[j].mass)/(circles[i].mass+circles[j].mass))));
+//                        circles[i].momentum = Op.vectorAdditionD(Op.scalarMultiplyD(vj, circles[i].mass *((circles[j].mass-circles[i].mass)/(circles[i].mass+circles[j].mass))), Op.scalarMultiplyD(vi, circles[i].mass * ((2*circles[i].mass)/(circles[i].mass+circles[j].mass))));
+                        double vx1 = circles[i].momentum[0] / circles[i].mass;
+                        double vy1 = circles[i].momentum[1] / circles[i].mass;
+
+                        double vx2 = circles[j].momentum[0] / circles[j].mass;
+                        double vy2 = circles[i].momentum[1] / circles[i].mass;
+
+                        circles[i].momentum[0] = circles[i].mass*( ( ( (circles[i].mass - circles[j].mass) / (circles[i].mass + circles[j].mass) ) * vx1) + ((2*circles[j].mass/(circles[i].mass + circles[j].mass)) * vx2 ) );
+                        circles[i].momentum[1] = circles[i].mass*( ( ( (circles[i].mass - circles[j].mass) / (circles[i].mass + circles[j].mass) ) * vy1) + ((2*circles[j].mass/(circles[i].mass + circles[j].mass)) * vy2 ) );
+
+
+                        circles[j].momentum[0] = circles[i].mass*( ( ( (circles[j].mass - circles[i].mass) / (circles[i].mass + circles[j].mass) ) * vx2) + ((2*circles[i].mass/(circles[i].mass + circles[j].mass)) * vx1 ) );
+                        circles[j].momentum[1] = circles[i].mass*( ( ( (circles[j].mass - circles[i].mass) / (circles[i].mass + circles[j].mass) ) * vy2) + ((2*circles[i].mass/(circles[i].mass + circles[j].mass)) * vy1 ) );
+
+                        System.out.println("Collision Detected");
+                        circles[i].collisionImmunity = DEFAULTCOLLISIONIMMUNITY;
+                        circles[j].collisionImmunity = DEFAULTCOLLISIONIMMUNITY;
+                    }
+                }
+            }
+
+            // decrement collision immunity
+            for (int i = 0; i < objects.length; i++) {
+                if (objects[i].collisionImmunity > 0) objects[i].collisionImmunity--;
+            }
+
 
 
 

@@ -87,5 +87,13 @@ public class Op {
         return b;
     }
 
+    public static double vectorMag(double[] v) {
+        double m = 0;
+        for (int i = 0; i < v.length; i++) {
+            m += v[i] *v[i];
+        }
+        return Math.sqrt(m);
+    }
+
 
 }
