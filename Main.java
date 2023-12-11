@@ -1,18 +1,16 @@
 import java.awt.*;
-import java.awt.image.CropImageFilter;
-import java.sql.SQLOutput;
 import java.util.Scanner;
 
 public class Main {
 
     //Settings
-    public static final int MAXSTEPS = 5000;
-    public static final double DT = 0.01;
-    public static final boolean GRAVITY = false;
+    public static final int MAX_STEPS = 5000;
+    public static final double DT = 0.05;
+    public static final boolean GRAVITY = true;
 
     public static final boolean enableInitDialogue = false;
 
-    public static final int DEFAULTCOLLISIONIMMUNITY = 3;
+    public static final int DEFAULT_COLLISION_IMMUNITY = 3;
 
     public static void main(String[] args) {
 
@@ -49,21 +47,22 @@ public class Main {
         c1.name = "c1";
         c1.mass = 3;
         c1.radius = 30;
-        c1.position = new double[]{300,250};
-        c1.momentum = new double[]{30,-10};
+        c1.position = new double[]{500,170};
+        c1.momentum = new double[]{0,0};
 
         Circle c2 = new Circle();
         c2.name = "c2";
         c2.mass = 3;
-        c2.radius = 20;
+        c2.radius = 30;
         c2.position = new double[]{400,200};
-        c2.momentum = new double[]{-10,20};
+        c2.momentum = new double[]{-100,0};
 
         Circle c3 = new Circle();
         c3.name = "c3";
         c3.mass = 3;
-        c3.radius = 30;
-        c3.position = new double[]{500,200};
+        c3.radius = 15;
+        c3.position = new double[]{200,230};
+        c3.momentum = new double[]{200,0};
 
         Box floor = new Box();
         floor.name = "floor";
@@ -71,6 +70,13 @@ public class Main {
         floor.height = 20;
         floor.width = 500;
         floor.position = new double[]{350,10};
+
+        Box ceiling = new Box();
+        ceiling.name = "ceiling";
+        ceiling.isStatic = true;
+        ceiling.height = 20;
+        ceiling.width = 500;
+        ceiling.position = new double[]{350,400};
 
         Box[] boxes;
         Circle[] circles;
@@ -174,7 +180,7 @@ public class Main {
         } else {
             //Master object array
 
-            objects = new Shapes[]{c1, c2, floor};
+            objects = new Shapes[]{c1, c2, c3, floor, ceiling};
 
 
             int boxArrayLength = 0;
@@ -223,7 +229,7 @@ public class Main {
 
 
         //Main Loop
-        for (int steps = 0; steps < MAXSTEPS; steps++) {
+        for (int steps = 0; steps < MAX_STEPS; steps++) {
 
             //Apply force of gravity
             if (GRAVITY) {
@@ -300,6 +306,7 @@ public class Main {
                     if (circles[j].collisionImmunity > 0) continue;
                     double[] T = {circles[i].position[0]-circles[j].position[0], circles[i].position[1]-circles[j].position[1]};
                     if (Op.vectorMag(T) <= (circles[i].radius+circles[j].radius)) {
+                        System.out.println("begin collison");
 
                         // i x
                         //circles[i].position[0] = ((circles[i].mass-circles[j].mass)/(circles[i].mass+circles[j].mass)) * circles[i].
@@ -310,20 +317,62 @@ public class Main {
 //                        circles[i].momentum = Op.vectorAdditionD(Op.scalarMultiplyD(vj, circles[i].mass *((circles[j].mass-circles[i].mass)/(circles[i].mass+circles[j].mass))), Op.scalarMultiplyD(vi, circles[i].mass * ((2*circles[i].mass)/(circles[i].mass+circles[j].mass))));
                         double vx1 = circles[i].momentum[0] / circles[i].mass;
                         double vy1 = circles[i].momentum[1] / circles[i].mass;
+                        double[] v1_B = new double[]{vx1, vy1};
 
                         double vx2 = circles[j].momentum[0] / circles[j].mass;
-                        double vy2 = circles[i].momentum[1] / circles[i].mass;
+                        double vy2 = circles[j].momentum[1] / circles[j].mass;
+                        double[] v2_B = new double[]{vx2, vy2};
 
-                        circles[i].momentum[0] = circles[i].mass*( ( ( (circles[i].mass - circles[j].mass) / (circles[i].mass + circles[j].mass) ) * vx1) + ((2*circles[j].mass/(circles[i].mass + circles[j].mass)) * vx2 ) );
-                        circles[i].momentum[1] = circles[i].mass*( ( ( (circles[i].mass - circles[j].mass) / (circles[i].mass + circles[j].mass) ) * vy1) + ((2*circles[j].mass/(circles[i].mass + circles[j].mass)) * vy2 ) );
+                        //convert to collision basis
+                        double[] P = new double[]{T[1], -1 * T[0]};
+                        Op.printArrayD(P);
+                        System.out.println();
+                        double[][] C = new double[][]{{P[0],T[0]},{P[1],T[1]}};
+                        Op.printMatrix(C);
+                        System.out.println();
+                        double[][] Cinv = Op.matrixInverse2d(C);
+                        Op.printMatrix(Cinv);
+                        System.out.println();
+
+                        Op.printMatrix(Op.matrixDotProduct(C,Cinv));
+
+                        double[] v1_C = Op.matrixVectorDotProduct(Cinv, v1_B);
+                        double[] v2_C = Op.matrixVectorDotProduct(Cinv, v2_B);
+                        Op.printArrayD(v1_C);
+                        System.out.println();
+                        Op.printArrayD(v2_C);
+                        System.out.println();
+
+//                        double v1f_C = v1_C[1] * -1;
+//                        double v2f_C = v2_C[1] * -1;
+                        double v1f_C = ((circles[i].mass - circles[j].mass)/(circles[i].mass + circles[j].mass))*v1_C[1] + (2*circles[j].mass/(circles[i].mass + circles[j].mass))*v2_C[1];
+                        double v2f_C = ((circles[j].mass - circles[i].mass)/(circles[i].mass + circles[j].mass))*v2_C[1] + (2*circles[i].mass/(circles[i].mass + circles[j].mass))*v1_C[1];
+
+                        v1_C[1] = v1f_C;
+                        v2_C[1] = v2f_C;
+
+                        v1_B = Op.matrixVectorDotProduct(C, v1_C);
+                        v2_B = Op.matrixVectorDotProduct(C, v2_C);
+
+                        circles[i].momentum = Op.scalarMultiplyD(v1_B, circles[i].mass);
+                        circles[j].momentum = Op.scalarMultiplyD(v2_B, circles[j].mass);
+
+                        Op.printArrayD(circles[i].momentum);
 
 
-                        circles[j].momentum[0] = circles[i].mass*( ( ( (circles[j].mass - circles[i].mass) / (circles[i].mass + circles[j].mass) ) * vx2) + ((2*circles[i].mass/(circles[i].mass + circles[j].mass)) * vx1 ) );
-                        circles[j].momentum[1] = circles[i].mass*( ( ( (circles[j].mass - circles[i].mass) / (circles[i].mass + circles[j].mass) ) * vy2) + ((2*circles[i].mass/(circles[i].mass + circles[j].mass)) * vy1 ) );
+
+
+
+//                        circles[i].momentum[0] = circles[i].mass*( ( ( (circles[i].mass - circles[j].mass) / (circles[i].mass + circles[j].mass) ) * vx1) + ((2*circles[j].mass/(circles[i].mass + circles[j].mass)) * vx2 ) );
+//                        circles[i].momentum[1] = circles[i].mass*( ( ( (circles[i].mass - circles[j].mass) / (circles[i].mass + circles[j].mass) ) * vy1) + ((2*circles[j].mass/(circles[i].mass + circles[j].mass)) * vy2 ) );
+//
+//
+//                        circles[j].momentum[0] = circles[i].mass*( ( ( (circles[j].mass - circles[i].mass) / (circles[i].mass + circles[j].mass) ) * vx2) + ((2*circles[i].mass/(circles[i].mass + circles[j].mass)) * vx1 ) );
+//                        circles[j].momentum[1] = circles[i].mass*( ( ( (circles[j].mass - circles[i].mass) / (circles[i].mass + circles[j].mass) ) * vy2) + ((2*circles[i].mass/(circles[i].mass + circles[j].mass)) * vy1 ) );
 
                         System.out.println("Collision Detected");
-                        circles[i].collisionImmunity = DEFAULTCOLLISIONIMMUNITY;
-                        circles[j].collisionImmunity = DEFAULTCOLLISIONIMMUNITY;
+                        circles[i].collisionImmunity = DEFAULT_COLLISION_IMMUNITY;
+                        circles[j].collisionImmunity = DEFAULT_COLLISION_IMMUNITY;
                     }
                 }
             }
@@ -345,7 +394,7 @@ public class Main {
 
                 // I converted everything into acceleration and velocity before making movement calculation
                 // I'm sure there is a more elegant way to do this.
-                // I was originally going to generalize everything to n-dimensions but i am too lazy so everything for here on is hard coded for 2d
+                // I was originally going to generalize everything to n-dimensions but I am too lazy so everything for here on is hard coded for 2d
 
                 if (objects[i].momentum[1] < 1 && objects[i].isOnFloor) {
                     objects[i].momentum[1] = 0;
@@ -374,7 +423,7 @@ public class Main {
             // Render Objects
             panel.clear();
             for (int i = 0; i < objects.length; i++) Render.drawObject(g, objects[i]);
-            panel.sleep(1);
+            panel.sleep(10);
 
 //            System.out.println("c1: " + c1.isOnFloor);
 //            System.out.println("c2: " + c2.isOnFloor);

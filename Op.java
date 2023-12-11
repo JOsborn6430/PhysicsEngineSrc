@@ -39,7 +39,6 @@ public class Op {
         double[][] I = new double[2][2];
         I = cloneArray2d(M);
         double invDer = 1.0/(M[0][0]*M[1][1]-M[0][1]*M[1][0]);
-        System.out.println("intDer = " + invDer);
         I[0][0] = M[1][1] * invDer;
         I[0][1] = -M[0][1] * invDer;
         I[1][0] = -M[1][0] * invDer;
